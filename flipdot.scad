@@ -31,21 +31,24 @@ base_mid_w = 80;
 show_components = 1;
 exploded = 1;
 
+standoff_y_dist = 7.35;
+standoff_x_dist = 14.7;
+
 standoffs = [
-    [12.7, 6.35],
-    [panel_width - 12.7, 6.35],
-    [12.7, panel_height - 6.35],
-    [panel_width - 12.7, panel_height - 6.35],
-    [79.375, 6.35],
-    [panel_width - 76.2, 6.35],
-    [79.375, panel_height-6.35],
-    [panel_width - 76.2, panel_height-6.35],
+    [standoff_x_dist, standoff_y_dist],
+    [panel_width - standoff_x_dist, standoff_y_dist],
+    [standoff_x_dist, panel_height - standoff_y_dist],
+    [panel_width - standoff_x_dist, panel_height - standoff_y_dist],
 ];
 
 print_area = [225, 225, 250];
 
+base_gap = pcb_depth/2;
+
 explode(d=exploded*50) {
 
+// components to make modeling a bit easier, these should be turned off when
+// exporting
 if (show_components) {
     // flip dot panels
     translate([0,0,pcb_depth+standoff_len+panel_offset])
@@ -92,23 +95,23 @@ if (show_components) {
 
 // base left / mid / right
 difference() {
-    union() {
-        cube([base_side_w, panel_height*2, pcb_depth]);
+    translate([0, 0, base_gap]) union() {
+        cube([base_side_w, panel_height*2, pcb_depth-base_gap]);
 
         translate([panel_width-base_mid_w/2,0,0])
-            cube([base_mid_w, panel_height*2, pcb_depth]);
+            cube([base_mid_w, panel_height*2, pcb_depth-base_gap]);
 
         translate([panel_width*2-base_side_w,0,0])
-            cube([base_side_w, panel_height*2, pcb_depth]);
+            cube([base_side_w, panel_height*2, pcb_depth-base_gap]);
     };
 
     for (px = [0, panel_width + 0]) {
         for (py = [0, panel_height + 0]) {
             // standoffs
-                for (st = standoffs) {
-                    translate([px, py, -1]) translate(st) cylinder(h=pcb_depth*3, r=2);
-                    translate([px, py, -6]) translate(st) cylinder(h=pcb_depth, r=5);
-                }
+            for (st = standoffs) {
+                translate([px, py, -1]) translate(st) cylinder(h=pcb_depth*3, r=2);
+                translate([px, py, -2]) translate(st) cylinder(h=pcb_depth, r=5);
+            }
         }
     };
 };
