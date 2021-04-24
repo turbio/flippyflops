@@ -7,7 +7,7 @@ bezel = 10;
 frame_depth = 50;
 dot_radius = 5;
 
-panel_height_pad = 1.5;
+panel_height_pad = 2;
 
 panel_depth = 28.575;
 panel_width = dot_radius*2*28;
@@ -31,7 +31,7 @@ base_mid_w = 80;
 show_components = 1;
 exploded = 1;
 
-standoff_y_dist = 7.35;
+standoff_y_dist = 10;
 standoff_x_dist = 14.7;
 
 standoffs = [
