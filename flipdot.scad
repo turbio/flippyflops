@@ -167,7 +167,7 @@ joint_width = bezel/2;
 joint_height = 5;
 joint_pad = 5;
 
-gender_diff = .2;
+gender_diff = .5;
 
 module box_joint(ext_r, female) {
 
