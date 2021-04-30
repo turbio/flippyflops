@@ -45,6 +45,8 @@ print_area = [(panel_width*2+bezel*2)/3, 225, 250];
 
 base_gap = pcb_depth/2;
 
+standoff_hole_margin_x = 4;
+
 // components to make modeling a bit easier, these should be turned off when
 // exporting
 if (show_components) {
@@ -106,7 +108,11 @@ module frame() translate([bezel, bezel, 0]) union() {
 			for (py = [0, panel_height + 0]) {
 				// standoffs
 				for (st = standoffs) {
-					translate([px, py, -1]) translate(st) cylinder(h=pcb_depth*3, r=2);
+					hull() {
+						translate([px-standoff_hole_margin_x, py, -1]) translate(st) cylinder(h=pcb_depth*3, r=2);
+						translate([px+standoff_hole_margin_x, py, -1]) translate(st) cylinder(h=pcb_depth*3, r=2);
+					}
+
 					translate([px, py, -2]) translate(st) cylinder(h=pcb_depth, r=8);
 				}
 			}
@@ -248,6 +254,13 @@ union() {
 
 	translate([print_area.x*2, bezel/2, joint_pad*1]) box_joint();
 	translate([print_area.x*2, bezel+panel_height*2, joint_pad*2]) box_joint();
+}
+
+// lil spacer cause im a lil too tolerant
+spacer_width = 4;
+translate([print_area.x+15, 0, 0]) difference() {
+	cube([spacer_width, bezel, frame_depth]);
+	translate([-10, joint_width, 5]) cube([100, 100, (5*6)]);
 }
 
 //#cube(print_area);
