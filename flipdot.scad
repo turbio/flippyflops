@@ -28,8 +28,7 @@ panel_offset = 0;
 base_side_w = 30;
 base_mid_w = 60;
 
-show_components = 1;
-exploded = 1;
+show_components = 0;
 
 standoff_y_dist = 10;
 standoff_x_dist = 14.7;
@@ -256,11 +255,12 @@ union() {
 	translate([print_area.x*2, bezel+panel_height*2, joint_pad*2]) box_joint();
 }
 
-// lil spacer cause im a lil too tolerant
-spacer_width = 4;
+// lil spacer cause tolerance
+spacer_width = 4.3;
+spacer_extra_depth = 0.4;
 translate([print_area.x+15, 0, 0]) difference() {
 	cube([spacer_width, bezel, frame_depth]);
-	translate([-10, joint_width, 5]) cube([100, 100, (5*6)]);
+	translate([-10, joint_width-spacer_extra_depth, 5]) cube([100, 100, (5*6)]);
 }
 
 //#cube(print_area);
