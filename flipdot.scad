@@ -4,7 +4,7 @@
 standoff_len = 9.525;
 
 bezel = 10;
-frame_depth = 50;
+frame_depth = 55;
 dot_radius = 5;
 
 panel_height_pad = 2;
@@ -256,11 +256,23 @@ union() {
 }
 
 // lil spacer cause tolerance
-spacer_width = 4.3;
+spacer_width = 4.4;
 spacer_extra_depth = 0.4;
 translate([print_area.x+15, 0, 0]) difference() {
 	cube([spacer_width, bezel, frame_depth]);
 	translate([-10, joint_width-spacer_extra_depth, 5]) cube([100, 100, (5*6)]);
+}
+
+esp32_dims = [54.29, 28.08, 12.6];
+
+// esp32 holster
+translate([100, 20, 0]) {
+	translate([0, -2, 0]) cube([esp32_dims.x/2, 2, esp32_dims.z]);
+	translate([0, -2, esp32_dims.z]) cube([esp32_dims.x/2, 4, 2]);
+
+	translate([0, esp32_dims.y, 0]) cube([esp32_dims.x/2, 2, esp32_dims.z]);
+	translate([0, esp32_dims.y-2, esp32_dims.z]) cube([esp32_dims.x/2, 4, 2]);
+	cube([esp32_dims.x/2, esp32_dims.y, 2]);
 }
 
 //#cube(print_area);
