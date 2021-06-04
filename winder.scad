@@ -8,7 +8,7 @@ shaft_len = 9.64;
 shaft_radius = 5.1/2;
 arm_size = 8.5;
 
-module clamp() {
+module motor_clamp() {
 	difference() {
 		union() {
 			cylinder(clamp_height, r=16);
@@ -37,10 +37,10 @@ module clamp() {
 	}
 }
 
-clamp();
+motor_clamp();
 
-translate([-30, 8, 30]) rotate([0, 90, -90]) {
-	clamp();
+translate([-40, 8, 30]) rotate([0, 90, -90]) {
+	motor_clamp();
 	translate([20, -arm_size/2, 2]) cube([5, arm_size, 2]);
 }
 
@@ -55,7 +55,7 @@ if (true) difference() {
 		translate([-100/2, -100/2+60-5, -25+2]) cube([5,5,25]);
 	}
 
-	cylinder(clamp_height, r=20);
+	translate([0, 0, -5]) cylinder(20, r=20);
 }
 
 spindle_r = 6;
@@ -84,9 +84,10 @@ if (false) union() {
 
 // motor shaft cap
 difference() {
-	translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(10, r=shaft_radius+1);
+	translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(12, r=shaft_radius+1);
 
-	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_radius);
+	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_radius-.05);
+
 	union() intersection() {
 		translate([0, shaft_y, 0]) cylinder(clamp_height+shaft_len, r=shaft_radius);
 		translate([-shaft_radius, shaft_y-2.94/2, clamp_height+shaft_len-6]) cube([10, 2.94, 6]);
@@ -94,45 +95,58 @@ difference() {
 }
 
 // side motor shaft cap
-translate([-30, -10, 10]) rotate([90, 0, 0]) difference() {
+translate([-35, -10, 25]) rotate([-90, 0, 0]) difference() {
 	union() {
-		translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(10, r=9);
+		translate([0, 0, 0]) cylinder(8, r=9);
+
+		translate([8, 0, 0]) rotate([90, 0, 90]) difference() {
+			translate([-1.5, 0, 0]) cube([4, 3, 25]);
+			translate([0, -1, 20]) cube([1, 5, 4]);
+		}
 	}
 
 
-	union() intersection() {
-		translate([0, shaft_y, 0]) cylinder(clamp_height+shaft_len, r=shaft_radius);
-		translate([-shaft_radius, shaft_y-2.94/2, clamp_height+shaft_len-6]) cube([10, 2.94, 6]);
+	translate([0, 0, -5]) intersection() {
+		translate([0, 0, 0]) cylinder(clamp_height+shaft_len, r=shaft_radius);
+		translate([-shaft_radius, 0-2.94/2, clamp_height+shaft_len-6]) cube([10, 2.94, 6]);
 	}
 }
 
-winder_arm_height = 34;
+winder_arm_height = 38;
 
+// stationary vertical arm
 translate([0, -4, 1])
 union() {
 	difference() {
 		translate([-2, 2.5, clamp_height]) cube([4, 3, winder_arm_height]);
-
-		translate([-.5, 3.5, clamp_height+shaft_y+3]) cube([1, 2, winder_arm_height]);
-		translate([-1, 3.5, clamp_height+shaft_y+3]) cube([2, 1, winder_arm_height]);
-
-		translate([0, 3.5, clamp_height+4]) rotate([0, 0, 45]) cube([1, 1, winder_arm_height]);
-
-		translate([-1, 2, clamp_height+shaft_y-4]) cube([2, 2, 2]);
-		translate([-1+.5, 2, clamp_height+shaft_y]) cube([1, 2, winder_arm_height]);
-
-		translate([1, 3.5, clamp_height+shaft_y+3]) rotate([0, 0, -180-45]) cube([.5, 1, 30]);
-		translate([-1, 3.5, clamp_height+shaft_y+3]) rotate([0, 0, -90+45]) cube([1, .5, 30]);
+		translate([-.5, 2, clamp_height+shaft_y+3]) cube([1, 5, winder_arm_height-10]);
 	}
 
 	translate([-4, 3-2, clamp_height]) cube([8, 4.5, 1]);
-
-	/*
-	difference() {
-		translate([-2, 3-0.5, clamp_height+winder_arm_height]) cube([4, 3, 1]);
-		translate([0, 4, clamp_height+winder_arm_height]) cylinder(10, r=.75);
-	}
-	*/
 }
 
-translate([-1, -.5, 40]) cube([2,.75,5]);
+translate([0, 0, 25]) difference() {
+	translate([-7/2, -3, 20]) cube([7,14,2]);
+
+	// arm holes
+	translate([0, -4, 1]) difference() {
+		translate([-4.2/2, 2.5, clamp_height]) cube([4.2, 3.5, winder_arm_height]);
+
+		translate([-.8/2, 2, clamp_height+shaft_y+3]) cube([.8, 5, winder_arm_height-12]);
+	}
+
+	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_radius+.1);
+}
+
+translate([0, 0, 30]) difference() {
+	translate([-7/2, -3, 20]) cube([7,14,2]);
+
+	// arm holes
+	translate([0, -4, 1]) difference() {
+		translate([-4.2/2, 2.5, clamp_height]) cube([4.2, 3.5, winder_arm_height]);
+
+		translate([-.8/2, 2, clamp_height+shaft_y+3]) cube([.8, 5, winder_arm_height-12]);
+	}
+
+	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_radius+.1);
+}
