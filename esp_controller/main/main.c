@@ -1,15 +1,12 @@
-/* Uart Events Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
+#include "cJSON.h"
 #include "driver/uart.h"
+#include "esp_http_client.h"
 #include "esp_log.h"
 #include "esp_system.h"
+#include "esp_tls.h"
+#include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "nvs_flash.h"
@@ -32,11 +29,7 @@
 // #include "fonts/formplex12_font.h"
 #include "fonts/pzim3x5_font.h"
 
-/**
- * This is a example which echos any data it receives on UART back to the sender
- * using RS485 interface in half duplex mode.
- */
-#define TAG "flipdots"
+#define TAG "flippyflops"
 
 #define ECHO_TEST_TXD (CONFIG_ECHO_UART_TXD)
 #define ECHO_TEST_RXD (CONFIG_ECHO_UART_RXD)
@@ -46,6 +39,9 @@
 
 #define BUF_SIZE (127)
 #define ECHO_UART_PORT (CONFIG_ECHO_UART_PORT_NUM)
+
+static uint8_t g_ssid[32] = "🐧";
+static uint8_t g_pass[32] = "wewladddd";
 
 typedef uint8_t panel[28 * 7];
 typedef panel display[4];
@@ -116,9 +112,9 @@ void blitstr(display d, int x, int y, const char *str, bool on, bool bg) {
   }
 }
 
-void clear(display d) {
+void clear(display d, bool on) {
   for (int p = 0; p < 4; p++) {
-    memset(d[p], 0, sizeof(panel));
+    memset(d[p], on, sizeof(panel));
   }
 }
 
@@ -160,7 +156,7 @@ void num_clock(void) {
       settimeofday(&tv, NULL);
     }
 
-    clear(d);
+    clear(d, false);
 
     time_t now;
     time(&now);
@@ -189,7 +185,7 @@ void word_clock(void) {
       settimeofday(&tv, NULL);
     }
 
-    clear(d);
+    clear(d, false);
 
     time_t now;
     time(&now);
@@ -346,7 +342,7 @@ void stonks(void) {
     hi = MAX(hi, cur);
     lo = MIN(lo, cur);
 
-    clear(d);
+    clear(d, false);
     char buf[100];
     sprintf(buf, "%s  %d.%0*d", sym, cur / decp, dec, cur % decp);
 
@@ -358,14 +354,9 @@ void stonks(void) {
         from = mapl(hi, lo, hist[i].open);
         to = mapl(hi, lo, cur);
       } else {
-        // from = mapl(hi, lo, hist[i].open);
-        // to = mapl(hi, lo, hist[i + 1].open);
         from = mapl(hi, lo, hist[i].hi);
         to = mapl(hi, lo, hist[i].lo);
       }
-
-      // printf("- %d -> %d : %d -> %d (%d,%d)\n", hist[i].open, to_v, from, to,
-      // lo, hi);
 
       for (int v = MIN(from, to); v <= MAX(from, to); v++) {
         putdot(d, i, v, true);
@@ -376,6 +367,186 @@ void stonks(void) {
 
     put_display(d);
   }
+}
+
+void init_wifi(void) {
+  ESP_ERROR_CHECK(esp_netif_init());
+
+  ESP_ERROR_CHECK(esp_event_loop_create_default());
+  assert(esp_netif_create_default_wifi_sta());
+
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+  // ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
+  ESP_ERROR_CHECK(esp_wifi_start());
+}
+
+#define WIFI_CONNECTED_BIT BIT0
+#define WIFI_FAIL_BIT BIT1
+#define WIFI_MAXIMUM_RETRY 3
+
+static EventGroupHandle_t s_wifi_event_group;
+
+static void event_handler(void *arg, esp_event_base_t event_base,
+                          int32_t event_id, void *event_data) {
+  static int s_retry_num = 0;
+
+  if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+    esp_wifi_connect();
+  } else if (event_base == WIFI_EVENT &&
+             event_id == WIFI_EVENT_STA_DISCONNECTED) {
+    if (s_retry_num < WIFI_MAXIMUM_RETRY) {
+      esp_wifi_connect();
+      s_retry_num++;
+    } else {
+      xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+    }
+  } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+    s_retry_num = 0;
+    xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+  }
+}
+
+bool wifi_connect(void) {
+  s_wifi_event_group = xEventGroupCreate();
+
+  esp_event_handler_instance_t instance_any_id;
+  esp_event_handler_instance_t instance_got_ip;
+  ESP_ERROR_CHECK(esp_event_handler_instance_register(
+      WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, &instance_any_id));
+  ESP_ERROR_CHECK(esp_event_handler_instance_register(
+      IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip));
+
+  wifi_config_t wifi_config = {
+      .sta =
+          {
+              .pmf_cfg = {.capable = true, .required = false},
+          },
+  };
+
+  memcpy(wifi_config.sta.ssid, g_ssid, 32);
+  memcpy(wifi_config.sta.password, g_pass, 32);
+
+  ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+  ESP_ERROR_CHECK(esp_wifi_connect());
+
+  EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+                                         WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+                                         pdFALSE, pdFALSE, portMAX_DELAY);
+
+  ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
+      IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
+  ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
+      WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
+  vEventGroupDelete(s_wifi_event_group);
+
+  if (bits & WIFI_CONNECTED_BIT) {
+    return true;
+  } else if (bits & WIFI_FAIL_BIT) {
+    return false;
+  }
+
+  return false;
+}
+
+#define CMD_BUFF 512
+
+void errstamp(display d) {
+  putdot(d, 56 - 1, 14 - 1, true);
+  putdot(d, 56 - 2, 14 - 1, false);
+  putdot(d, 56 - 3, 14 - 1, true);
+
+  putdot(d, 56 - 1, 14 - 2, false);
+  putdot(d, 56 - 2, 14 - 2, true);
+  putdot(d, 56 - 3, 14 - 2, false);
+
+  putdot(d, 56 - 1, 14 - 3, true);
+  putdot(d, 56 - 2, 14 - 3, false);
+  putdot(d, 56 - 3, 14 - 3, true);
+}
+
+void stream_http(const char *url) {
+  static display d;
+
+  esp_http_client_config_t config = {
+      .url = url,
+      .buffer_size = 0,
+  };
+
+  esp_http_client_handle_t client = esp_http_client_init(&config);
+  esp_err_t err;
+
+  printf("opening connection...\n");
+
+  if ((err = esp_http_client_open(client, 0)) != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to open HTTP connection: %s", esp_err_to_name(err));
+    return;
+  }
+
+  int content_length = esp_http_client_fetch_headers(client);
+  int status = esp_http_client_get_status_code(client);
+
+  if (status == 200) {
+    char buff[CMD_BUFF];
+    char *i = buff;
+
+    clear(d, false);
+
+    for (;;) {
+      char c;
+      int read_len = esp_http_client_read(client, &c, 1);
+
+      if (read_len <= 0) {
+        ESP_LOGE(TAG, "Error read data");
+
+        errstamp(d);
+        break;
+      }
+
+      if (c == '\n') {
+        *i = 0;
+        // printf("cmd: %s\n", buff);
+        i = buff;
+
+        cJSON *cmd = cJSON_Parse(buff);
+
+        cJSON *t = NULL;
+        if ((t = cJSON_GetObjectItemCaseSensitive(cmd, "c"))) {
+          // printf("clear\n");
+          clear(d, !!t->valueint);
+        } else if ((t = cJSON_GetObjectItemCaseSensitive(cmd, "s"))) {
+          // printf("putstr %s\n", t->valuestring);
+          blitstr(d, cJSON_GetObjectItemCaseSensitive(cmd, "x")->valueint,
+                  cJSON_GetObjectItemCaseSensitive(cmd, "y")->valueint,
+                  t->valuestring, true, false);
+        } else if ((t = cJSON_GetObjectItemCaseSensitive(cmd, "p"))) {
+          // printf("putdot\n");
+          putdot(d, cJSON_GetObjectItemCaseSensitive(cmd, "x")->valueint,
+                 cJSON_GetObjectItemCaseSensitive(cmd, "y")->valueint,
+                 !!t->valueint);
+        } else if (cJSON_GetObjectItemCaseSensitive(cmd, "d")) {
+          // printf("putdot\n");
+          put_display(d);
+        }
+
+        cJSON_Delete(cmd);
+
+      } else if (i - buff < CMD_BUFF - 1) {
+        *i = c;
+        i++;
+      }
+    }
+  } else {
+    printf("ohno status %d\n", status);
+    errstamp(d);
+  }
+
+  put_display(d);
+
+  esp_http_client_close(client);
+  esp_http_client_cleanup(client);
 }
 
 void app_main(void) {
@@ -399,15 +570,46 @@ void app_main(void) {
 
   ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, 1024, 1024, 0, NULL, 0));
 
-  setenv("TZ", "PDT7", 1);
-  tzset();
+  display d;
+  clear(d, true);
+  put_display(d);
 
-  struct timeval tv = {
-      .tv_sec = 1620028847,
-      .tv_usec = 0,
-  };
-  settimeofday(&tv, NULL);
+  printf("init flash...\n");
 
-  // stonks();
-  word_clock();
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
+
+  printf("init wifi...\n");
+  init_wifi();
+
+  printf("connecting to wifi...\n");
+
+  clear(d, false);
+  blitstr(d, 1, 1, "connecting...", true, false);
+  put_display(d);
+
+  if (!wifi_connect()) {
+    clear(d, false);
+    blitstr(d, 1, 1, "connection", true, false);
+    blitstr(d, 1, 7, "error!", true, false);
+    put_display(d);
+
+    // TODO: idk, panic or something lol
+    for (;;)
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+
+  printf("connected!\n");
+
+  clear(d, false);
+  blitstr(d, 1, 1, "connected", true, false);
+  put_display(d);
+
+  for (;;)
+    stream_http("https://flippyflops.turbio.repl.co/stream");
 }
