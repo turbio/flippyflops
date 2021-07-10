@@ -14,7 +14,7 @@ const send = cmd => {
 }
 
 let last_data = null;
-const hold_time = 1000*60*1;
+const hold_time = 1000*60*5;
 
 const msgd = () => last_data = new Date();
 
