@@ -1,2 +1,4 @@
 hist
 db2fs.js
+*.gcode
+build
