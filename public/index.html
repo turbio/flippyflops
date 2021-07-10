@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Dots Dot Turbio</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="preload" as="image" href="/loading.svg">
+  </head>
+  <body>
+    <h1 class="header">Dots Dot Turbio</h1>
+		<div class="content">
+			<h3>send me a message!</h3>
+			<form id="msgform" action="/msg" method="GET">
+				<input id="msginput" type="text" name="msg" maxlength="28" placeholder="hai!" size="28"/>
+				<button id="msgbtn">send</button>
+			</form>
+      <div id="thnx" style="display:none;padding-top:1em">thnx  dude. Your message just appeared on my wall. Maybe I'll see it... who knows</div>
+      <h3>or draw me a picture!</h3>
+  	  <div id="editor"></div>
+      <div id="thnx2" style="display:none;padding-top:1em">thnx dude. Your picture just appeared on my wall. Maybe I'll see it... who knows</div>
+    </div>
+    <p>This site flips some real life dots right on my real life wall. Looks a little something like this:</p>
+    <img alt="flip dot display showing UwU" src="uwu_dots.jpg" width="600px"/>
+
+    <p>
+      Thnx for the help guys
+      <a href="">leon332157</a>
+      <a href="">miro</a>
+      <a href="">CoderMan51</a>
+      <a href="">JDOG787</a>
+    </p>
+<script>
+var formelem = document.getElementById('msgform');
+formelem.addEventListener('submit', function(e) {
+  e.stopPropagation();
+  e.preventDefault();
+  document.getElementById('msgbtn').classList.add('sending');
+  fetch('/msg?'+ new URLSearchParams({
+      msg: document.getElementById('msginput').value
+    }))
+    .then(function(r){return r.text()})
+    .then(function(t){
+      document.getElementById('msgbtn').classList.remove('sending');
+      document.getElementById('thnx').style.display = 'block';
+    })
+});
+</script>
+    <script src="editor.js"></script>
+  </body>
+</html>

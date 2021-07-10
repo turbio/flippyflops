@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; display: block;" width="181px" height="181px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+<circle cx="26" cy="26" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0s" calcMode="discrete"></animate>
+</circle>
+<circle cx="50" cy="26" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0.13157894736842105s" calcMode="discrete"></animate>
+</circle>
+<circle cx="74" cy="26" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0.2631578947368421s" calcMode="discrete"></animate>
+</circle>
+<circle cx="26" cy="50" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0.9210526315789473s" calcMode="discrete"></animate>
+</circle>
+<circle cx="74" cy="50" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0.3947368421052631s" calcMode="discrete"></animate>
+</circle>
+<circle cx="26" cy="74" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0.7894736842105262s" calcMode="discrete"></animate>
+</circle>
+<circle cx="50" cy="74" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0.6578947368421052s" calcMode="discrete"></animate>
+</circle>
+<circle cx="74" cy="74" r="10.5" fill="#000000">
+  <animate attributeName="fill" values="#ffffff;#000000;#000000" keyTimes="0;0.125;1" dur="1.0526315789473684s" repeatCount="indefinite" begin="0.5263157894736842s" calcMode="discrete"></animate>
+</circle>
+<circle cx="50" cy="50" r="10.5" fill="#000000"/>
+</svg>
+

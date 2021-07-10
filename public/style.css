@@ -1,0 +1,97 @@
+* {
+	font-family: 'Consolas', 'Courier New', Courier, monospace;
+}
+button {
+  cursor: pointer;
+}
+body {
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /*
+	text-align: center;
+	background-color: #141414;
+	color: white;
+  */
+  background-color: #eeeeee;
+  color: black;
+	max-width: 600px;
+}
+img {
+  max-width: 100%;
+}
+.canvc {
+  border: solid white 8px;
+  display:inline-block;
+  /*box-shadow: 3px 3px 20px rgba(0, 0, 0, .25);*/
+}
+canvas {
+  max-width: 100%;
+  display:block;
+}
+:root {
+	font-size: 16px;
+	margin: 0;
+	
+}
+#editor {
+	margin: auto;
+}
+form > input {
+	padding: 1em;
+	border: 0;
+	border-radius: 10em;
+}
+*:focus-visible {
+	outline: 0;
+}
+form > button {
+	padding: 1em;
+	background-color: rgb(28, 231, 21);
+	font-weight: bold;
+	border: 0;
+	border-radius: 10em;
+}
+.content {
+	margin: auto;
+}
+.header {
+	margin-top: 0;
+	margin-bottom:2rem;
+	padding:.5rem;
+	/*background-color: #0a0a0a;*/
+}
+.sendbutton {
+	padding: 1em;
+	background-color: rgb(28, 231, 21);
+	font-weight: bold;
+	border: 0;
+	border-radius: 10em;
+}
+.undobutton {
+	padding: 1em;
+	background-color: rgb(250, 2, 2);
+	color: white;
+	font-weight: bold;
+	border: 0;
+	border-radius: 10em;
+}
+.clearbutton {
+	padding: 1em;
+	background-color: white;
+	font-weight: bold;
+	border: 0;
+	border-radius: 10em;
+}
+.undobutton:disabled {
+	background-color: rgb(80, 22, 22);
+	color: gray
+}
+
+button.sending {
+  color: rgba(0, 0, 0, 0);
+	background-color: rgb(28, 231, 21);
+  background-image: url(/loading.svg);
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
