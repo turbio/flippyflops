@@ -1,8 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const Database = require("@replit/database")
-
-const db = new Database()
 
 const app = express();
 app.use(bodyParser.text({type: '*/*'}));
@@ -23,7 +20,6 @@ app.all('/msg/:msg', (req, res) => {
   const body = req.params.msg;
   if (!body) return res.end('uwu daddy');
   console.log('msg', body)
-  db.set('msg:'+(+new Date()), body);
   send([
     {c:0},
     {s: body.slice(0,14), x: 1, y: 1},
@@ -39,7 +35,6 @@ app.get('/msg', (req, res) => {
 
   msgd();
   console.log('msg', body)
-  db.set('msg:'+(+new Date()), body);
 
   send([
     {c:0},
@@ -56,7 +51,6 @@ app.post('/msg', (req, res) => {
 
   msgd();
   console.log('msg', body)
-  db.set('msg:'+(+new Date()), body);
 
   send([
     {c:0},
@@ -85,7 +79,6 @@ app.post('/set', (req, res) => {
   console.log('|'+'='.repeat(56-2)+'|');
   console.log(bmp.join('').match(/.{1,56}/g).join("\n"));
   console.log('|'+'='.repeat(56-2)+'|');
-  db.set('img:'+(+new Date()), bmp.join(''));
 
 	if(bod.pixels.length <= 0) return;
 	let sendQueue = [];
