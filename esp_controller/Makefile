@@ -3,6 +3,6 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := echo_rs485
+PROJECT_NAME := flippyflops
 
 include $(IDF_PATH)/make/project.mk

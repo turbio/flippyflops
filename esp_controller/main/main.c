@@ -31,14 +31,14 @@
 
 #define TAG "flippyflops"
 
-#define ECHO_TEST_TXD (CONFIG_ECHO_UART_TXD)
-#define ECHO_TEST_RXD (CONFIG_ECHO_UART_RXD)
+#define ECHO_TEST_TXD (23)
+#define ECHO_TEST_RXD (22)
 
-#define ECHO_TEST_RTS (CONFIG_ECHO_UART_RTS)
+#define ECHO_TEST_RTS (18)
 #define ECHO_TEST_CTS (UART_PIN_NO_CHANGE)
 
 #define BUF_SIZE (127)
-#define ECHO_UART_PORT (CONFIG_ECHO_UART_PORT_NUM)
+#define ECHO_UART_PORT (2)
 
 static uint8_t g_ssid[32] = "🐧";
 static uint8_t g_pass[32] = "wewladddd";
@@ -611,5 +611,5 @@ void app_main(void) {
   put_display(d);
 
   for (;;)
-    stream_http("https://flippyflops.turbio.repl.co/stream");
+    stream_http("https://dots.turb.io/stream");
 }
