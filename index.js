@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -257,6 +258,6 @@ setInterval(() => {
   send([{}]);
 }, 2000)
 
-app.listen(3000, () => {
+app.listen(process.env.PORT, process.env.HOST, () => {
   console.log('suwuver stuwurted UwU');
 });
