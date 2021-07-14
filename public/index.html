@@ -40,10 +40,9 @@ formelem.addEventListener('submit', function(e) {
   e.stopPropagation();
   e.preventDefault();
   document.getElementById('msgbtn').classList.add('sending');
-  fetch('/msg?'+ new URLSearchParams({
+  fetch('https://dots.turb.io/msg?'+ new URLSearchParams({
       msg: document.getElementById('msginput').value
-    }))
-    .then(function(r){return r.text()})
+    }), {mode: "no-cors"})
     .then(function(t){
       document.getElementById('msgbtn').classList.remove('sending');
       document.getElementById('thnx').style.display = 'block';

@@ -202,7 +202,7 @@ class SendButton {
 
   save() {
     this.dom.classList.add('sending');
-    postPx(picToPx(this.picture)).then(()=>{
+    postPx(picToPx(this.picture)).then(() =>{
         this.dom.classList.remove('sending');
         document.getElementById('thnx2').style.display = 'block';
       })
@@ -303,6 +303,7 @@ const picToPx = (picture) => {
 
 const postPx = pixels =>  fetch('https://dots.turb.io/set', {
     method: 'POST',
+    mode: "no-cors",
     body: JSON.stringify({
       pixels: pixels,
     }),
