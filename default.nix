@@ -9,5 +9,6 @@ let
       yarnNix = ./yarn.nix;
     };
 in
-
-pkgs.writeShellScriptBin "flippyflops" "PORT=${toString port} HOST=${host} ${yarnedPkg}/bin/flippyflops"
+pkgs.writeShellScriptBin "flippyflops" ''
+  cd ${./.} && PORT=${toString port} HOST=${host} ${yarnedPkg}/bin/flippyflops
+''
