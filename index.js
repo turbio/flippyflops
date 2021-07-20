@@ -16,11 +16,24 @@ const hold_time = 1000*60*10;
 
 const msgd = () => last_data = new Date();
 
+let msgs_received = 0;
+let imgs_received = 0;
+let sets_received = 0;
+
+app.all('/metrics', (req, res) => {
+  res.send(`flippyflops_traffic_received{type="msg"} ${msgs_received}
+flippyflops_traffic_received{type="img"} ${imgs_received}
+flippyflops_traffic_received{type="set"} ${sets_received}
+flippyflops_boards_connected ${listen.length}
+`);
+});
+
 app.all('/msg/:msg', (req, res) => {
   msgd();
   const body = req.params.msg;
   if (!body) return res.end('uwu daddy');
   console.log('msg', body)
+  msgs_received++;
   send([
     {c:0},
     {s: body.slice(0,14), x: 1, y: 1},
@@ -36,6 +49,7 @@ app.get('/msg', (req, res) => {
 
   msgd();
   console.log('msg', body)
+  msgs_received++;
 
   send([
     {c:0},
@@ -52,6 +66,7 @@ app.post('/msg', (req, res) => {
 
   msgd();
   console.log('msg', body)
+  msgs_received++;
 
   send([
     {c:0},
@@ -76,10 +91,11 @@ app.post('/set', (req, res) => {
 
   let bmp = [...new Array(56*14)].fill('.');
   bod.pixels
-    .forEach(({x,y,state}) => {bmp[x+(y*56)] = state ? '#' : ' '});
+    .forEach(({x,y,state}) => {bmp[x+(y*56)] = state ? '#' : '.'});
   console.log('|'+'='.repeat(56-2)+'|');
   console.log(bmp.join('').match(/.{1,56}/g).join("\n"));
   console.log('|'+'='.repeat(56-2)+'|');
+  imgs_received++;
 
 	if(bod.pixels.length <= 0) return;
 	let sendQueue = [];
@@ -101,7 +117,8 @@ app.post('/set', (req, res) => {
 
 app.all('/set/:x/:y/:on', (req, res) => {
   msgd();
-  console.log(req.params)
+  console.log('set', req.params)
+  sets_received++;
   send([
     {
       p: (req.params.on=='0'||req.params.on=='false') ? 0 : 1,

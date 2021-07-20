@@ -15,6 +15,7 @@ body {
   background-color: #eeeeee;
   color: black;
 	max-width: 600px;
+	padding: 1em;
 }
 img {
   max-width: 100%;
