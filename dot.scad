@@ -1,3 +1,7 @@
+$fn = 200;
+
+dot_rot = 0;
+
 inf = 100;
 
 dot_radius = 5;
@@ -15,38 +19,63 @@ hole_depth_pad = .3;
 arm_width = 2.5;
 arm_side_pad = 1;
 arm_top_pad = 1;
+base_width = 12;
 
-magnet_core_radius = .95;
+// magnet_core_radius = .95; // nail
+magnet_core_radius = 1.02+.05; // ferrite core
 
+// dot
+
+translate([0, 0, base_height+dot_radius+base_pad]) rotate([0, 0, 45]) rotate([dot_rot, 0, 0]) rotate([0, 0, -45])
+//translate([20, 0, .5/2])
 difference() {
-    rotate([0, 0, 45]) translate([0, 0, base_height+dot_radius+base_pad]) rotate([360*$t, 0, 0])
-    //translate([20, 0, .5/2])
+    rotate([0, 0, 45])
     union() {
-        translate([0, 0, -(dot_thiccness)/2]) cylinder(dot_thiccness, r=dot_radius, $fn=100);
+        translate([0, 0, -(dot_thiccness)/2]) cylinder(dot_thiccness, r=dot_radius);
         cube([(dot_radius*2)+(pin_extrusion*2), pin_width, dot_thiccness], true);
     }
 
-    rotate([0, 0, -45]) translate([dot_radius, 0, -1]) cylinder(10, r=magnet_core_radius+.25, $fn=100);
+    // core hole
+    rotate([0, 0, -45]) translate([dot_radius, 0, -1]) cylinder(10, r=magnet_core_radius+.25);
+
+    // magnet hole
+    rotate([0,0,45]) cube([3,1,2], center=true);
 }
 
-base_width = 12;
+wall_wid = 1;
+wall_hid = 3;
 
+// base
 difference() {
     translate([-base_width/2, -base_width/2, 0])
-        cube([ base_width, base_width, base_height ]);
-    rotate([0, 0, -45]) translate([dot_radius, 0, -1]) cylinder(10, r=magnet_core_radius, $fn=100);
-    rotate([0, 0, -45]) translate([-(dot_radius), 0, -1]) cylinder(10, r=magnet_core_radius, $fn=100);
+        cube([ base_width, base_width, base_height + wall_hid]);
+
+    // magnet core holes
+    rotate([0, 0, -45]) translate([dot_radius, 0, -1]) cylinder(10, r=magnet_core_radius);
+    rotate([0, 0, -45]) translate([-(dot_radius), 0, -1]) cylinder(10, r=magnet_core_radius);
+
+    // base cutout
+    difference() {
+        translate([wall_wid -base_width/2, wall_wid -base_width/2, base_height])
+            cube([base_width-(wall_wid*2),base_width-(wall_wid*2),20]);
+
+        // hole supports
+        translate([2, -3-2, 3]) cube([3,3,2]);
+        translate([-3-2, 2, 3]) cube([3,3,2]);
+    }
 }
 
+// arms
 for (i = [0, 180]) {
     intersection() {
         rotate([0, 0, 45-i]) union() {
             difference() {
-                translate([dot_radius+dot_to_arm_pad, -arm_width/2 - dot_to_arm_pad/2, base_height])
-                    cube([arm_width, arm_width+dot_to_arm_pad, dot_radius+base_pad+(pin_width/2)+arm_top_pad]);
+                translate([dot_radius+dot_to_arm_pad, -arm_width/2 - dot_to_arm_pad/2, 0])
+                    cube([arm_width, arm_width+dot_to_arm_pad, dot_radius+base_pad+(pin_width/2)+arm_top_pad+base_height]);
+
                 translate([dot_radius+pin_extrusion+hole_depth_pad, 0, base_height+dot_radius+base_pad])
                     rotate([0, -90, 0])
-                    cylinder(inf, r=(pin_width/2)+hole_radius_pad, $fn=100);
+                    cylinder(inf, r=(pin_width/2)+hole_radius_pad);
             }
         }
 

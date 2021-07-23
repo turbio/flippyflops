@@ -2,7 +2,10 @@ $fn = 100;
 
 clamp_height = 4;
 clamp_top_thickness = 2;
-magnet_core_radius = .95;
+
+// magnet_core_radius = .95; // nail
+magnet_core_radius = 1.02+.05; // ferrite core
+
 shaft_y = 14-9/2-1.6;
 shaft_len = 9.64;
 shaft_radius = 5.1/2;
@@ -126,7 +129,7 @@ union() {
 }
 
 translate([0, 0, 25]) difference() {
-	translate([-7/2, -3, 20]) cube([7,14,2]);
+	translate([-7/2, -3, 20]) cube([7,11,2]);
 
 	// arm holes
 	translate([0, -4, 1]) difference() {
@@ -139,11 +142,11 @@ translate([0, 0, 25]) difference() {
 }
 
 translate([0, 0, 30]) difference() {
-	translate([-7/2, -3, 20]) cube([7,14,2]);
+	translate([-7/2, -3, 20]) cube([7,11,2]);
 
 	// arm holes
 	translate([0, -4, 1]) difference() {
-		translate([-4.2/2, 2.5, clamp_height]) cube([4.2, 3.5, winder_arm_height]);
+		translate([-4.5/2, 2.5, clamp_height]) cube([4.5, 3.8, winder_arm_height]);
 
 		translate([-.8/2, 2, clamp_height+shaft_y+3]) cube([.8, 5, winder_arm_height-12]);
 	}
