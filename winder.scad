@@ -3,8 +3,8 @@ $fn = 100;
 clamp_height = 4;
 clamp_top_thickness = 2;
 
-// magnet_core_radius = .95; // nail
-magnet_core_radius = 1.02+.05; // ferrite core
+// magnet_core_r = .95; // nail
+magnet_core_r = 1.02+.05; // ferrite core
 
 shaft_y = 14-9/2-1.6;
 shaft_len = 9.64;
@@ -83,13 +83,13 @@ if (false) union() {
 
 
 // reference magnet core
-//translate([0, shaft_y-8.34, clamp_height+shaft_len+2]) cylinder(14, r=magnet_core_radius);
+//translate([0, shaft_y-8.34, clamp_height+shaft_len+2]) cylinder(14, r=magnet_core_r);
 
 // motor shaft cap
 difference() {
-	translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(12, r=shaft_radius+1);
+	translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(16, r=shaft_radius+1);
 
-	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_radius-.05);
+	translate([0, shaft_y, clamp_height+shaft_len+1]) cylinder(20, r=magnet_core_r+.05);
 
 	union() intersection() {
 		translate([0, shaft_y, 0]) cylinder(clamp_height+shaft_len, r=shaft_radius);
@@ -138,7 +138,7 @@ translate([0, 0, 25]) difference() {
 		translate([-.8/2, 2, clamp_height+shaft_y+3]) cube([.8, 5, winder_arm_height-12]);
 	}
 
-	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_radius+.1);
+	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_r+.1);
 }
 
 translate([0, 0, 30]) difference() {
@@ -151,5 +151,5 @@ translate([0, 0, 30]) difference() {
 		translate([-.8/2, 2, clamp_height+shaft_y+3]) cube([.8, 5, winder_arm_height-12]);
 	}
 
-	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_radius+.1);
+	translate([0, shaft_y, clamp_height+shaft_len]) cylinder(14, r=magnet_core_r+.1);
 }

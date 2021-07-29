@@ -1,7 +1,13 @@
+draw_cores = true;
+
 $fn = 200;
 
-//dot_rot = $t*360;
-dot_rot = 0;
+//dot_rot = .055*360;
+//dot_rot = .44*360;
+
+dot_rot = (($t *(.44-.055)) + .055) * 360;
+
+//dot_rot = 0;
 
 inf = 100;
 
@@ -32,6 +38,7 @@ wall_hid = 3;
 // dot
 
 module dot() {
+	color([.8,.4,.4])
 	translate([0, 0, base_height+dot_radius+base_pad]) rotate([0, 0, 45]) rotate([dot_rot, 0, 0]) rotate([0, 0, -45])
 	//translate([20, 0, .5/2])
 	difference() {
@@ -49,6 +56,7 @@ module dot() {
 	}
 
 	// base
+	color([1,1,1])
 	difference() {
 		translate([-base_width/2, -base_width/2, 0])
 			cube([ base_width, base_width, base_height + wall_hid]);
@@ -94,6 +102,7 @@ module dot() {
 	}
 
 	// arms
+	color([1,1,1])
 	for (i = [0, 180]) {
 		intersection() {
 			rotate([0, 0, 45-i]) union() {
@@ -112,8 +121,27 @@ module dot() {
 	}
 }
 
-//color([.2,.2,.2])
-//	cylinder(magnet_core_h, r=magnet_core_r);
+union() {
+	rotate([0, 0, -45]) translate([dot_radius, 0, -5]) union() {
+		if (draw_cores) color([.2,.2,.2]) cylinder(magnet_core_h, r=magnet_core_r);
+
+		difference() {
+			translate([0, 0, -.5]) cylinder(1, r=magnet_core_r+1);
+			cylinder(1, r=magnet_core_r-.03);
+			translate([0, 0, -1]) cylinder(2, r=.4);
+		}
+	}
+
+	rotate([0, 0, 180-45]) translate([dot_radius, 0, -5]) union() {
+		if (draw_cores) color([.2,.2,.2]) cylinder(magnet_core_h, r=magnet_core_r);
+
+		difference() {
+			translate([0, 0, -.5]) cylinder(1, r=magnet_core_r+1);
+			cylinder(1, r=magnet_core_r-.03);
+			translate([0, 0, -1]) cylinder(2, r=.4);
+		}
+	}
+}
 
 for (x = [0: 1-1]) {
 	for (y = [0: 1-1]) {
