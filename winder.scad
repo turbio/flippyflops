@@ -85,11 +85,31 @@ if (false) union() {
 // reference magnet core
 //translate([0, shaft_y-8.34, clamp_height+shaft_len+2]) cylinder(14, r=magnet_core_r);
 
-// motor shaft cap
-difference() {
-	translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(16, r=shaft_radius+1);
+// motor shaft caps
+if (true) for (i = [-3: 2]) {
+	translate([i * 10, 10, 0]) difference() {
+		translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(14+(i*.5), r=shaft_radius+1);
 
-	translate([0, shaft_y, clamp_height+shaft_len+1]) cylinder(20, r=magnet_core_r+.05);
+		translate([0, shaft_y, clamp_height+shaft_len+1]) {
+			cylinder(20, r=magnet_core_r);
+			translate([-1/2, 0, 0]) cube([1,5,100]);
+		}
+
+		union() intersection() {
+			translate([0, shaft_y, 0]) cylinder(clamp_height+shaft_len, r=shaft_radius);
+			translate([-shaft_radius, shaft_y-2.94/2, clamp_height+shaft_len-6]) cube([10, 2.94, 6]);
+		}
+	}
+}
+
+// this one worked the best
+difference() {
+	translate([0, shaft_y, clamp_height+shaft_len-5]) cylinder(14+(-3*.5), r=shaft_radius+1);
+
+	translate([0, shaft_y, clamp_height+shaft_len+1]) {
+		cylinder(20, r=magnet_core_r);
+		translate([-1/2, 0, 0]) cube([1,5,100]);
+	}
 
 	union() intersection() {
 		translate([0, shaft_y, 0]) cylinder(clamp_height+shaft_len, r=shaft_radius);
