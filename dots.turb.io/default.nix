@@ -1,4 +1,4 @@
-{ pkgs ? (import <nixpkgs> { }), port ? 3000, host ? "0.0.0.0" }:
+{ pkgs ? (import <nixpkgs> { }) }:
 let
   yarnedPkg = pkgs.mkYarnPackage
     {
@@ -10,5 +10,5 @@ let
     };
 in
 pkgs.writeShellScriptBin "flippyflops" ''
-  cd ${./.} && PORT=${toString port} HOST=${host} ${yarnedPkg}/bin/flippyflops
+  cd ${./.} && ${yarnedPkg}/bin/flippyflops
 ''
