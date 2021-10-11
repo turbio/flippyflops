@@ -1,6 +1,9 @@
 draw_cores = false;
-draw_dot = false;
-draw_core_caps = false;
+draw_dot = true;
+draw_core_caps = true;
+
+n_cells_x = 2;
+n_cells_y = 2;
 
 $fn = 200;
 
@@ -33,7 +36,8 @@ arm_top_pad = 1;
 base_width = 12;
 
 // magnet_core_r = .95; // nail
-magnet_core_r = 1.02+.02; // ferrite core
+//  magnet_core_r = 1.02 + 0.02; // ferrite core
+magnet_core_r = 1.82/2 + 0.05; // ferrite core second order
 magnet_core_h = 14.83;
 
 wall_wid = 1;
@@ -62,8 +66,8 @@ module dot() {
 	// base
 	color([.8,.8,.8])
 	difference() {
-		translate([-base_width/2, -base_width/2, 0+2])
-			cube([ base_width, base_width, base_height + wall_hid-2]);
+		translate([-base_width/2, -base_width/2, 0+0])
+			cube([ base_width, base_width, base_height + wall_hid-0]);
 
 		// base cutout
 		difference() {
@@ -107,39 +111,47 @@ module dot() {
 					translate([dot_radius+pin_extrusion+hole_depth_pad, 0, base_height+dot_radius+base_pad])
 						rotate([0, -90, 0])
 						cylinder(inf, r=(pin_width/2)+hole_radius_pad);
+
+					/*
+					* square hole... bad idea lol
+					* rrr = (pin_width/2)+hole_radius_pad;
+
+					* translate([dot_radius+pin_extrusion+hole_depth_pad, 0, base_height+dot_radius+base_pad])
+					* 	rotate([0, -90, 0])
+					* 	translate([-rrr, -rrr, 0])
+					* 	cube([rrr*2, 2*rrr, 5]);
+					*/
 				}
 			}
 
 			translate([-base_width/2, -base_width/2, 0]) cube([base_width, base_width, inf]);
 		}
 	}
-}
 
-// core caps
-union() {
-	rotate([0, 0, -45]) translate([dot_radius, 0, -5]) union() {
-		if (draw_cores) color([.2,.2,.2]) cylinder(magnet_core_h, r=magnet_core_r);
+	// core caps
+	union() {
+		rotate([0, 0, -45]) translate([dot_radius, 0, -5]) union() {
+			if (draw_cores) color([.2,.2,.2]) cylinder(magnet_core_h, r=magnet_core_r);
 
-		if (draw_core_caps) difference() {
-			translate([0, 0, -.5]) cylinder(1, r=magnet_core_r+1);
-			cylinder(1, r=magnet_core_r);
-			translate([0, 0, -1]) cylinder(2, r=.5);
+			if (draw_core_caps) difference() {
+				translate([0, 0, -.5]) cylinder(1, r=magnet_core_r+1);
+				cylinder(1, r=magnet_core_r-.05);
+				translate([0, 0, -1]) cylinder(2, r=.5);
+			}
+		}
+
+		rotate([0, 0, 180-45]) translate([dot_radius, 0, -5]) union() {
+			if (draw_cores) color([.2,.2,.2]) cylinder(magnet_core_h, r=magnet_core_r);
+
+			if (draw_core_caps) difference() {
+				translate([0, 0, -.5]) cylinder(1, r=magnet_core_r+1);
+				cylinder(1, r=magnet_core_r-.05);
+				translate([0, 0, -1]) cylinder(2, r=.5);
+			}
 		}
 	}
 
-	rotate([0, 0, 180-45]) translate([dot_radius, 0, -5]) union() {
-		if (draw_cores) color([.2,.2,.2]) cylinder(magnet_core_h, r=magnet_core_r);
-
-		if (draw_core_caps) difference() {
-			translate([0, 0, -.5]) cylinder(1, r=magnet_core_r+1);
-			cylinder(1, r=magnet_core_r);
-			translate([0, 0, -1]) cylinder(2, r=.5);
-		}
-	}
 }
 
-for (x = [0: 1-1]) {
-	for (y = [0: 1-1]) {
-		translate([x * (base_width-wall_wid), y * (base_width-wall_wid), 0]) dot();
-	}
-}
+for (x = [0: (n_cells_x)-1]) for (y = [0: (n_cells_y)-1]) 
+	translate([x * (base_width-wall_wid), y * (base_width-wall_wid), 0]) dot();

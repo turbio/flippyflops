@@ -4,7 +4,8 @@ clamp_height = 4;
 clamp_top_thickness = 2;
 
 // magnet_core_r = .95; // nail
-magnet_core_r = 1.02+.05; // ferrite core
+// magnet_core_r = 1.02+.02; // ferrite core
+magnet_core_r = 1.82/2 + 0.02; // ferrite core second order
 
 shaft_y = 14-9/2-1.6;
 shaft_len = 9.64;

@@ -83,8 +83,14 @@ void loop() {
     if (at == 0) {
       n++;
       Serial.println(String("trip done, ") + n + " round trips * " + dist + " revs per = " + n*2*dist);
-      Serial.println("again? 'y'");
-      state = S_WAIT;
+
+      if (n < 3) {
+        Serial.println("again!");
+        state = S_DOWN;
+      } else {
+        Serial.println("again? 'y'");
+        state = S_WAIT;
+      }
     }
   } else if (state == S_WAIT) {
     if (Serial.available() && Serial.readString()[0] == 'y') {

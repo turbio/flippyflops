@@ -2,3 +2,4 @@ hist
 db2fs.js
 *.gcode
 build
+*.3mf
