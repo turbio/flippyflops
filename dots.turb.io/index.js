@@ -258,10 +258,12 @@ setInterval(() => {
     b = `to ${num[now.getHours() % 12]}`;
   }
 
+  const night = now.getHours() < 7 || now.getHours() > 18;
+
   send([
-    {c: +(now.getHours() < 7 || now.getHours() > 18)},
-    {s: a, x: 2, y: 1},
-    {s: b, x: 2, y: 8},
+    {c: +night},
+    {s: a, x: 2, y: 1, i: +night},
+    {s: b, x: 2, y: 8, i: +night},
     {
       p: 1,
       x: 54 + Math.floor((now.getSeconds() % 4)/2),
