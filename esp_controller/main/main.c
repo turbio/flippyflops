@@ -514,20 +514,16 @@ void stream_http(const char *url) {
 
         cJSON *t = NULL;
         if ((t = cJSON_GetObjectItemCaseSensitive(cmd, "c"))) {
-          // printf("clear\n");
           clear(d, !!t->valueint);
         } else if ((t = cJSON_GetObjectItemCaseSensitive(cmd, "s"))) {
-          // printf("putstr %s\n", t->valuestring);
           blitstr(d, cJSON_GetObjectItemCaseSensitive(cmd, "x")->valueint,
                   cJSON_GetObjectItemCaseSensitive(cmd, "y")->valueint,
-                  t->valuestring, true, false);
+                  t->valuestring, !cJSON_GetObjectItemCaseSensitive(cmd, "i")->valueint, false);
         } else if ((t = cJSON_GetObjectItemCaseSensitive(cmd, "p"))) {
-          // printf("putdot\n");
           putdot(d, cJSON_GetObjectItemCaseSensitive(cmd, "x")->valueint,
                  cJSON_GetObjectItemCaseSensitive(cmd, "y")->valueint,
                  !!t->valueint);
         } else if (cJSON_GetObjectItemCaseSensitive(cmd, "d")) {
-          // printf("putdot\n");
           put_display(d);
         }
 
