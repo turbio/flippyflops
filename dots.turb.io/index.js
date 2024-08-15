@@ -266,7 +266,7 @@ setInterval(() => {
   const night = now.getHours() < 7 || now.getHours() > 18;
 
   send([
-    {c: +night},
+    {c: +!night},
     {s: a, x: 2, y: 1, i: +night},
     {s: b, x: 2, y: 8, i: +night},
     {
