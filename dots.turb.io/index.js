@@ -116,6 +116,7 @@ app.post('/set', (req, res) => {
 });
 
 app.post("/cmd", (req, res) => {
+  msgd();
   send(JSON.parse(req.body));
   res.end();
 });
