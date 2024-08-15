@@ -115,6 +115,11 @@ app.post('/set', (req, res) => {
 	res.status(201).send('DRAWN');
 });
 
+app.post("/cmd", (req, res) => {
+  send(JSON.parse(req.body));
+  res.end();
+});
+
 app.all('/set/:x/:y/:on', (req, res) => {
   msgd();
   console.log('set', req.params)
@@ -241,7 +246,7 @@ setInterval(() => {
 
   const angle = [
     undefined,       "five",    "ten", "quarter", "twenty", "twenty five",
-    "half",   "twenty five", "twenty", "querter",    "ten", "five",
+    "half",   "twenty five", "twenty", "quarter",    "ten", "five",
   ]
 
   let a;

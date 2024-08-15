@@ -3,3 +3,4 @@ db2fs.js
 *.gcode
 build
 *.3mf
+esp-idf

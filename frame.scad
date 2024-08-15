@@ -1,6 +1,5 @@
 // all measurements are in mm
 
-
 standoff_len = 9.525;
 
 bezel = 10;
@@ -172,7 +171,7 @@ joint_width = bezel/2;
 joint_height = 5;
 joint_pad = 5;
 
-gender_diff = .5;
+gender_diff = 1;
 
 module box_joint(ext_r, female) {
 
