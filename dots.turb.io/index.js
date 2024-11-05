@@ -260,7 +260,8 @@ setInterval(() => {
     b = `to ${num[now.getHours() % 12]}`;
   }
 
-  const night = now.getHours() < 7 || now.getHours() > 18;
+  // const night = now.getHours() < 7 || now.getHours() > 18;
+  const night = false;
 
   send([
     {c: +night},
