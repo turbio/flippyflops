@@ -1,6 +1,7 @@
 draw_cores = false;
-draw_dot = true;
-draw_core_caps = true;
+draw_disc = false;
+draw_core_caps = false;
+draw_base = true;
 
 n_cells_x = 2;
 n_cells_y = 2;
@@ -45,25 +46,27 @@ wall_hid = 3;
 
 module dot() {
 	// disc
-	if (draw_dot)
-	color([.8,.4,.4])
-	translate([0, 0, base_height+dot_radius+base_pad]) rotate([0, 0, 45]) rotate([dot_rot, 0, 0]) rotate([0, 0, -45])
-	//translate([20, 0, .5/2])
-	difference() {
-		rotate([0, 0, 45])
-		union() {
-			translate([0, 0, -(dot_thiccness)/2]) cylinder(dot_thiccness, r=dot_radius);
-			cube([(dot_radius*2)+(pin_extrusion*2), pin_width, dot_thiccness], true);
+	if (draw_disc) {
+		color([.8,.4,.4])
+		translate([0, 0, base_height+dot_radius+base_pad]) rotate([0, 0, 45]) rotate([dot_rot, 0, 0]) rotate([0, 0, -45])
+		//translate([20, 0, .5/2])
+		difference() {
+			rotate([0, 0, 45])
+			union() {
+				translate([0, 0, -(dot_thiccness)/2]) cylinder(dot_thiccness, r=dot_radius);
+				cube([(dot_radius*2)+(pin_extrusion*2), pin_width, dot_thiccness], true);
+			}
+
+			// magnet core hole
+			rotate([0, 0, -45]) translate([dot_radius, 0, -1]) cylinder(10, r=magnet_core_r+.25);
+
+			// magnet hole
+			rotate([0,0,45]) cube([3.01,1.01,2], center=true);
 		}
-
-		// core hole
-		rotate([0, 0, -45]) translate([dot_radius, 0, -1]) cylinder(10, r=magnet_core_r+.25);
-
-		// magnet hole
-		rotate([0,0,45]) cube([3.01,1.01,2], center=true);
 	}
 
 	// base
+	if (draw_base)
 	color([.8,.8,.8])
 	difference() {
 		translate([-base_width/2, -base_width/2, 0+0])
@@ -82,7 +85,6 @@ module dot() {
 				translate([0, 3, 0]) cylinder(2, r=2);
 			}
 
-
 			translate([2+3/2, -3-2 + 3/2, 2.5]) rotate([0,0, 180]) hull() {
 				cylinder(2, r=2);
 				translate([-3, 0, 0]) cylinder(2, r=2);
@@ -95,11 +97,20 @@ module dot() {
 		rotate([0, 0, -45]) translate([-(dot_radius), 0, -1]) cylinder(10, r=magnet_core_r);
 
 		// magnet core coil cutout
-		translate([2+3/2, -3-2 + 3/2, -1]) cylinder(3, r=3/2);
-		translate([-3-2 + 3/2, 2 + 3/2, -1]) cylinder(3, r=3/2);
+		union() {
+			translate([2+3/2, -3-2 + 3/2, -1]) cylinder(2, r=3/2);
+			translate([2+3/2, -3-2 + 3/2, -1+2]) cylinder(1, r1=3/2, r2=0.5);
+		}
+
+		union() {
+			translate([-3-2 + 3/2, 2 + 3/2, -1]) cylinder(2, r=3/2);
+			translate([-3-2 + 3/2, 2 + 3/2, -1+2]) cylinder(1, r1=3/2, r2=0.5);
+		}
+
 	}
 
 	// arms
+	if (draw_base)
 	color([.8,.8,.8])
 	for (i = [0, 180]) {
 		intersection() {
@@ -108,14 +119,16 @@ module dot() {
 					translate([dot_radius+dot_to_arm_pad, -arm_width/2 - dot_to_arm_pad/2, 2])
 						cube([arm_width, arm_width+dot_to_arm_pad, dot_radius+base_pad+(pin_width/2)+arm_top_pad+base_height-2]);
 
+					// hole
 					translate([dot_radius+pin_extrusion+hole_depth_pad, 0, base_height+dot_radius+base_pad])
+						scale([1, 1, 1.25])
 						rotate([0, -90, 0])
 						cylinder(inf, r=(pin_width/2)+hole_radius_pad);
 
 					/*
 					* square hole... bad idea lol
 					* rrr = (pin_width/2)+hole_radius_pad;
-
+					*
 					* translate([dot_radius+pin_extrusion+hole_depth_pad, 0, base_height+dot_radius+base_pad])
 					* 	rotate([0, -90, 0])
 					* 	translate([-rrr, -rrr, 0])

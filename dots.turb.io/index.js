@@ -235,10 +235,12 @@ app.post('/stat', (req, res) => {
   res.end();
 });
 
+const tz = process.env.TZ || 'America/New_York';
+
 setInterval(() => {
   if (new Date() - last_data < hold_time) return;
 
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
 
   const num = [
     "one",   "two",   "three", "four", "five",   "six",
@@ -264,14 +266,15 @@ setInterval(() => {
     b = `to ${num[now.getHours() % 12]}`;
   }
 
-  const night = now.getHours() < 7 || now.getHours() > 18;
+  // const night = now.getHours() < 7 || now.getHours() > 18;
+  const night = false;
 
   send([
-    {c: +!night},
-    {s: a, x: 2, y: 1, i: +night},
-    {s: b, x: 2, y: 8, i: +night},
+    {c: +night},
+    {s: a, x: 2, y: 1},
+    {s: b, x: 2, y: 8},
     {
-      p: 1,
+      p: +!night,
       x: 54 + Math.floor((now.getSeconds() % 4)/2),
       y: Math.floor(((now.getSeconds()+1) % 4)/2),
     },
