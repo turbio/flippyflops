@@ -3,3 +3,5 @@ db2fs.js
 *.gcode
 build
 *.3mf
+dots.turb.io/node_modules
+esp-idf

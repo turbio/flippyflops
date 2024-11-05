@@ -229,10 +229,12 @@ app.post('/stat', (req, res) => {
   res.end();
 });
 
+const tz = process.env.TZ || 'America/New_York';
+
 setInterval(() => {
   if (new Date() - last_data < hold_time) return;
 
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
 
   const num = [
     "one",   "two",   "three", "four", "five",   "six",

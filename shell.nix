@@ -29,6 +29,16 @@ let
         sha256 = "1q4n661s5zyw0ci7q78pxinc34wp8rg42p65873f6gfcxja2zw42";
       };
     };
+
+    gdbgui = super.buildPythonPackage rec {
+      pname = "gdbgui";
+      version = "0.13.2.0";
+      doCheck = false;
+      src = super.fetchPypi {
+        inherit pname version;
+        sha256 = "1q4n661s5zyw0ci7q78pxinc34wp8rg42p65873f6gfcxja2zw43";
+      };
+    };
   };
 
   idf-package-overlay = self: super: {
@@ -67,7 +77,6 @@ pkgs.mkShell {
     rust-esp.cargo
     rust-esp.esp-idf
     rust-esp.esp32-toolchain
-    pkgs.rustfmt
   ];
 
   shellHook = ''

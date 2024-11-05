@@ -1,0 +1,27 @@
+{
+    "parameterSets": {
+        "show": {
+            "base_gap": "0",
+            "base_mid_w": "60",
+            "base_side_w": "30",
+            "bezel": "10",
+            "dot_radius": "5",
+            "frame_depth": "55",
+            "panel_depth": "28.575",
+            "panel_height_pad": "2",
+            "panel_offset": "0",
+            "pcb_depth": "19.05",
+            "pcb_height": "63.5",
+            "pcb_offx": "74",
+            "pcb_offy": "4",
+            "pcb_width": "139.7",
+            "render_panel": "false",
+            "standoff_hole_margin_x": "4",
+            "standoff_len": "9.525",
+            "standoff_x_dist": "14.7",
+            "standoff_y_dist": "10"
+        }
+    },
+    "parameterSets": "",
+    "fileFormatVersion": "1"
+}
