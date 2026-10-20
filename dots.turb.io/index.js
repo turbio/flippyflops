@@ -3,16 +3,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const app = express();
-app.use(bodyParser.text({type: '*/*'}));
+app.use(bodyParser.text({ type: '*/*' }));
 app.use(express.static('public'));
 
 let listen = [];
 const send = cmd => {
-  listen.forEach(l => l(cmd));
+	listen.forEach(l => l(cmd));
 }
 
 let last_data = null;
-const hold_time = 1000*60*10;
+const hold_time = 1000 * 60 * 10;
 
 const msgd = () => last_data = new Date();
 
@@ -21,88 +21,121 @@ let imgs_received = 0;
 let sets_received = 0;
 
 app.all('/metrics', (req, res) => {
-  res.send(`flippyflops_traffic_received{type="msg"} ${msgs_received}
+	res.send(`flippyflops_traffic_received{type="msg"} ${msgs_received}
 flippyflops_traffic_received{type="img"} ${imgs_received}
 flippyflops_traffic_received{type="set"} ${sets_received}
 flippyflops_boards_connected ${listen.length}
 `);
 });
 
+let stop_msg = false;
+const maybe_ctrl = (msg) => {
+	if (msg === 'stop') {
+		stop_msg = true;
+
+		send([
+			{ c: 0 },
+			{ s: "cya!", x: 1, y: 1 },
+			{ d: 1 },
+		]);
+
+		for (let y = 0; y < 14; y++) {
+			for (let x = 0; x < 56; y++) {
+				send([
+					{ p: 1, x, y },
+					{ d: 1 },
+				]);
+			}
+		}
+
+		return true;
+	} else if (msg === 'start') {
+		stop_msg = false;
+
+		return true;
+	}
+
+	return false;
+}
+
 app.all('/msg/:msg', (req, res) => {
-  msgd();
-  const body = req.params.msg;
-  if (!body) return res.end('uwu daddy');
-  console.log('msg', body)
-  msgs_received++;
-  send([
-    {c:0},
-    {s: body.slice(0,14), x: 1, y: 1},
-    {s: body.slice(14), x: 1, y: 7},
-    {d:1},
-  ]);
-  res.send();
+	const body = req.params.msg;
+	if (!body) return res.end('uwu daddy');
+	console.log('msg', body)
+	msgs_received++;
+	if (maybe_ctrl(body)) return;
+
+	msgd();
+	send([
+		{ c: 0 },
+		{ s: body.slice(0, 14), x: 1, y: 1 },
+		{ s: body.slice(14), x: 1, y: 7 },
+		{ d: 1 },
+	]);
+	res.send();
 });
 
 app.get('/msg', (req, res) => {
-  const body = req.query.msg;
-  if (!body) return res.redirect('/');
+	const body = req.query.msg;
+	if (!body) return res.redirect('/');
+	console.log('msg', body)
+	msgs_received++;
 
-  msgd();
-  console.log('msg', body)
-  msgs_received++;
+	if (maybe_ctrl(body)) return;
 
-  send([
-    {c:0},
-    {s: body.slice(0,14), x: 1, y: 1},
-    {s: body.slice(14), x: 1, y: 7},
-    {d:1},
-  ]);
-  res.redirect('/');
+	msgd();
+	send([
+		{ c: 0 },
+		{ s: body.slice(0, 14), x: 1, y: 1 },
+		{ s: body.slice(14), x: 1, y: 7 },
+		{ d: 1 },
+	]);
+	res.redirect('/');
 });
 
 app.post('/msg', (req, res) => {
-  const body = req.body;
-  if (!body) return res.redirect('/');
+	const body = req.body;
+	if (!body) return res.redirect('/');
 
-  msgd();
-  console.log('msg', body)
-  msgs_received++;
+	msgd();
+	console.log('msg', body)
+	msgs_received++;
 
-  send([
-    {c:0},
-    {s: body.slice(0,14), x: 1, y: 1},
-    {s: body.slice(14), x: 1, y: 7},
-    {d:1},
-  ]);
-  res.redirect('/');
+	send([
+		{ c: 0 },
+		{ s: body.slice(0, 14), x: 1, y: 1 },
+		{ s: body.slice(14), x: 1, y: 7 },
+		{ d: 1 },
+	]);
+	res.redirect('/');
 });
 
 app.post('/set', (req, res) => {
-  msgd();
-  let bod;
+	msgd();
+	let bod;
 	try {
 		bod = JSON.parse(req.body);
 	}
-	catch(error) {
+	catch (error) {
 		console.log(error);
 		res.status(400).send('Not Valid JSON!');
-    return;
+		return;
 	}
 
-  let bmp = [...new Array(56*14)].fill('.');
-  bod.pixels
-    .forEach(({x,y,state}) => {bmp[x+(y*56)] = state ? '#' : '.'});
-  console.log('|'+'='.repeat(56-2)+'|');
-  console.log(bmp.join('').match(/.{1,56}/g).join("\n"));
-  console.log('|'+'='.repeat(56-2)+'|');
-  imgs_received++;
+	let bmp = [...new Array(56 * 14)].fill('.');
+	bod.pixels
+		.forEach(({ x, y, state }) => { bmp[x + (y * 56)] = state ? '#' : '.' });
+	console.log('|' + '='.repeat(56 - 2) + '|');
+	console.log(bmp.join('').match(/.{1,56}/g).join("\n"));
+	console.log('|' + '='.repeat(56 - 2) + '|');
+	imgs_received++;
 
-	if(bod.pixels.length <= 0) return;
+	if (bod.pixels.length <= 0) return;
 	let sendQueue = [];
-	for(var i = 0; i < bod.pixels.length; i++) {
+	for (var i = 0; i < bod.pixels.length; i++) {
 		const pix = bod.pixels[i];
-		if(typeof pix.x != 'number' || typeof pix.y != 'number') res.status(400).send('TypeError: pixel location is not a number');
-		if(typeof pix.state != 'boolean') res.status(400).send('TypeError: State is not a boolean');
+		if (typeof pix.x != 'number' || typeof pix.y != 'number') res.status(400).send('TypeError: pixel location is not a number');
+		if (typeof pix.state != 'boolean') res.status(400).send('TypeError: State is not a boolean');
 		var state = pix.state ? 1 : 0;
 		sendQueue.push({
 			p: state,
@@ -110,45 +143,45 @@ app.post('/set', (req, res) => {
 			y: pix.y,
 		});
 	}
-	sendQueue.push({d:1});
+	sendQueue.push({ d: 1 });
 	send(sendQueue);
 	res.status(201).send('DRAWN');
 });
 
 app.post("/cmd", (req, res) => {
-  msgd();
-  send(JSON.parse(req.body));
-  res.end();
+	msgd();
+	send(JSON.parse(req.body));
+	res.end();
 });
 
 app.all('/set/:x/:y/:on', (req, res) => {
-  msgd();
-  console.log('set', req.params)
-  sets_received++;
-  send([
-    {
-      p: (req.params.on=='0'||req.params.on=='false') ? 0 : 1,
-      x: parseInt(req.params.x),
-      y: parseInt(req.params.y),
-    },
-    {d:1},
-  ]);
-  res.send();
+	msgd();
+	console.log('set', req.params)
+	sets_received++;
+	send([
+		{
+			p: (req.params.on == '0' || req.params.on == 'false') ? 0 : 1,
+			x: parseInt(req.params.x),
+			y: parseInt(req.params.y),
+		},
+		{ d: 1 },
+	]);
+	res.send();
 });
 
 app.get('/stream', (req, res) => {
-  console.log('incoming stream!')
-  const cb = cmd => {
-    cmd.forEach(c => {
-      res.write(JSON.stringify(c)+'\n');
-    })
-  }
+	console.log('incoming stream!')
+	const cb = cmd => {
+		cmd.forEach(c => {
+			res.write(JSON.stringify(c) + '\n');
+		})
+	}
 
-  listen.push(cb);
+	listen.push(cb);
 
-  req.on("close", () => {
-    listen = listen.filter(l => l !== cb);
-  });
+	req.on("close", () => {
+		listen = listen.filter(l => l !== cb);
+	});
 });
 
 const stats_width = 56;
@@ -160,132 +193,132 @@ let stat_interv = 0;
 
 
 app.post('/statclear', (req, res) => {
-  const b = JSON.parse(req.body)
+	const b = JSON.parse(req.body)
 
-  stat_name = b.name;
-  stat_interv = b.interv;
-  last_stat = null;
-  hist.fill(undefined);
-  res.end();
+	stat_name = b.name;
+	stat_interv = b.interv;
+	last_stat = null;
+	hist.fill(undefined);
+	res.end();
 });
 
 app.post('/stat', (req, res) => {
-  msgd();
+	msgd();
 
-  if (!req.body.match(/^[0-9.]+$/)) {
-    return;
-  }
+	if (!req.body.match(/^[0-9.]+$/)) {
+		return;
+	}
 
-  const v = parseFloat(req.body)
+	const v = parseFloat(req.body)
 
-  if (hist[hist.length-1]) {
-    if (v > hist[hist.length-1].hi) {
-      hist[hist.length-1].hi = v;
-    }
+	if (hist[hist.length - 1]) {
+		if (v > hist[hist.length - 1].hi) {
+			hist[hist.length - 1].hi = v;
+		}
 
-    if (v < hist[hist.length-1].lo) {
-      hist[hist.length-1].lo = v;
-    }
-  } else {
-    hist[hist.length-1] = {hi: v, lo: v, open: v};
-  }
+		if (v < hist[hist.length - 1].lo) {
+			hist[hist.length - 1].lo = v;
+		}
+	} else {
+		hist[hist.length - 1] = { hi: v, lo: v, open: v };
+	}
 
-  if (!last_stat || new Date() - last_stat > stat_interv) {
-    hist.push({hi: v, lo: v, open: v});
-    hist.shift();
-    last_stat = new Date();
-  }
+	if (!last_stat || new Date() - last_stat > stat_interv) {
+		hist.push({ hi: v, lo: v, open: v });
+		hist.shift();
+		last_stat = new Date();
+	}
 
-  let hi = Number.MIN_SAFE_INTEGER;
-  let lo = Number.MAX_SAFE_INTEGER;
-  hist.filter(l => !!l).forEach(l => {
-    hi = Math.max(hi, l.hi);
-    lo = Math.min(lo, l.lo);
-  });
+	let hi = Number.MIN_SAFE_INTEGER;
+	let lo = Number.MAX_SAFE_INTEGER;
+	hist.filter(l => !!l).forEach(l => {
+		hi = Math.max(hi, l.hi);
+		lo = Math.min(lo, l.lo);
+	});
 
-  const mapl = v => {
-    const disp_hi = 5;
-    const disp_lo = 13;
+	const mapl = v => {
+		const disp_hi = 5;
+		const disp_lo = 13;
 
-    return Math.floor(((v - lo) / (hi - lo)) * (disp_hi - disp_lo)) + disp_lo
-  }
+		return Math.floor(((v - lo) / (hi - lo)) * (disp_hi - disp_lo)) + disp_lo
+	}
 
-  const cmd = [
-    {c: 0}, {s: stat_name+' '+v, x:1, y:0}
-  ];
-  hist.forEach((l, i) => {
-    if (!l) return;
+	const cmd = [
+		{ c: 0 }, { s: stat_name + ' ' + v, x: 1, y: 0 }
+	];
+	hist.forEach((l, i) => {
+		if (!l) return;
 
-    let fr, to;
-    if (i == hist.length-1) {
-      fr = mapl(l.open)
-      to = mapl(v);
-    } else {
-      fr = mapl(l.hi);
-      to = mapl(l.lo);
-    }
+		let fr, to;
+		if (i == hist.length - 1) {
+			fr = mapl(l.open)
+			to = mapl(v);
+		} else {
+			fr = mapl(l.hi);
+			to = mapl(l.lo);
+		}
 
-    for (let y = Math.min(fr, to); y <= Math.max(fr, to); y++) {
-      cmd.push({p: 1, x: i, y})
-    }
-  });
-  cmd.push({d:1})
-  send(cmd);
+		for (let y = Math.min(fr, to); y <= Math.max(fr, to); y++) {
+			cmd.push({ p: 1, x: i, y })
+		}
+	});
+	cmd.push({ d: 1 })
+	send(cmd);
 
-  res.end();
+	res.end();
 });
 
 const tz = process.env.TZ || 'America/New_York';
 
 setInterval(() => {
-  if (new Date() - last_data < hold_time) return;
+	if (new Date() - last_data < hold_time || stop_msg) return;
 
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
+	const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
 
-  const num = [
-    "one",   "two",   "three", "four", "five",   "six",
-    "seven", "eight", "nine",  "ten",  "eleven", "twelve",
-  ];
+	const num = [
+		"one", "two", "three", "four", "five", "six",
+		"seven", "eight", "nine", "ten", "eleven", "twelve",
+	];
 
-  const angle = [
-    undefined,       "five",    "ten", "quarter", "twenty", "twenty five",
-    "half",   "twenty five", "twenty", "quarter",    "ten", "five",
-  ]
+	const angle = [
+		undefined, "five", "ten", "quarter", "twenty", "twenty five",
+		"half", "twenty five", "twenty", "quarter", "ten", "five",
+	]
 
-  let a;
-  let b;
+	let a;
+	let b;
 
-  if (now.getMinutes() < 5) {
-    a = num[(now.getHours() - 1 + 12) % 12];
-    b = "o'clock";
-  } else if (now.getMinutes() < 35) {
-    a = angle[Math.floor(now.getMinutes() / 5)];
-    b = `past ${num[(now.getHours() - 1 + 12) % 12]}`;
-  } else {
-    a = angle[Math.floor(now.getMinutes() / 5)];
-    b = `to ${num[now.getHours() % 12]}`;
-  }
+	if (now.getMinutes() < 5) {
+		a = num[(now.getHours() - 1 + 12) % 12];
+		b = "o'clock";
+	} else if (now.getMinutes() < 35) {
+		a = angle[Math.floor(now.getMinutes() / 5)];
+		b = `past ${num[(now.getHours() - 1 + 12) % 12]}`;
+	} else {
+		a = angle[Math.floor(now.getMinutes() / 5)];
+		b = `to ${num[now.getHours() % 12]}`;
+	}
 
-  // const night = now.getHours() < 7 || now.getHours() > 18;
-  const night = false;
+	// const night = now.getHours() < 7 || now.getHours() > 18;
+	const night = false;
 
-  send([
-    {c: +night},
-    {s: a, x: 2, y: 1},
-    {s: b, x: 2, y: 8},
-    {
-      p: +!night,
-      x: 54 + Math.floor((now.getSeconds() % 4)/2),
-      y: Math.floor(((now.getSeconds()+1) % 4)/2),
-    },
-    {d:1},
-  ]);
+	send([
+		{ c: +night },
+		{ s: a, x: 2, y: 1 },
+		{ s: b, x: 2, y: 8 },
+		{
+			p: +!night,
+			x: 54 + Math.floor((now.getSeconds() % 4) / 2),
+			y: Math.floor(((now.getSeconds() + 1) % 4) / 2),
+		},
+		{ d: 1 },
+	]);
 }, 1000)
 
 setInterval(() => {
-  send([{}]);
+	send([{}]);
 }, 2000)
 
 app.listen(process.env.PORT, process.env.HOST, () => {
-  console.log('suwuver stuwurted UwU');
+	console.log('suwuver stuwurted UwU');
 });
