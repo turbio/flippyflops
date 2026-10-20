@@ -40,7 +40,7 @@ const maybe_ctrl = (msg) => {
 		]);
 
 		for (let y = 0; y < 14; y++) {
-			for (let x = 0; x < 56; y++) {
+			for (let x = 0; x < 56; x++) {
 				send([
 					{ p: 1, x, y },
 					{ d: 1 },
@@ -63,7 +63,7 @@ app.all('/msg/:msg', (req, res) => {
 	if (!body) return res.end('uwu daddy');
 	console.log('msg', body)
 	msgs_received++;
-	if (maybe_ctrl(body)) return;
+	if (maybe_ctrl(body)) return res.send();
 
 	msgd();
 	send([
@@ -81,7 +81,7 @@ app.get('/msg', (req, res) => {
 	console.log('msg', body)
 	msgs_received++;
 
-	if (maybe_ctrl(body)) return;
+	if (maybe_ctrl(body)) return res.redirect('/');
 
 	msgd();
 	send([
